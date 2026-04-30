@@ -64,13 +64,9 @@ export const LoginPage: React.FC = () => {
             disabled={loading}
             className="w-full bg-blue-600 py-6 rounded-[2rem] text-white font-black text-2xl hover:bg-blue-700 hover:shadow-2xl transition-all active:scale-95 shadow-xl shadow-blue-600/30 border-b-8 border-blue-900 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading ? 'AUTHENTICATING…' : 'INITIALIZE SESSION'}
+            {loading ? 'AUTHENTICATING…' : 'LOGIN'}
           </button>
         </form>
-        <div className="mt-10 text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] space-y-1">
-          <p className="opacity-70">Demo Credentials</p>
-          <p className="opacity-50">admin / admin123 — billing / billing123 — viewer / viewer123</p>
-        </div>
       </div>
     </div>
   );
