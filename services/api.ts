@@ -40,6 +40,20 @@ export const api = {
     
     return updatedProduct;
   },
+  deleteProduct: async (id: string): Promise<void> => {
+    const products = getStorage<Product[]>('products', MOCK_PRODUCTS);
+    const target = products.find(p => p.id === id);
+    const filtered = products.filter(p => p.id !== id);
+    setStorage('products', filtered);
+    api.logAudit({
+      id: Math.random().toString(),
+      userId: 'system',
+      userName: 'Admin',
+      action: 'PRODUCT_DELETED',
+      details: target ? `${target.name} (HSN: ${target.hsnCode})` : `id=${id}`,
+      timestamp: new Date().toISOString()
+    });
+  },
 
   // Invoices
   getInvoices: async (): Promise<Invoice[]> => {

@@ -5,7 +5,7 @@ import { api } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -17,13 +17,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : null;
   });
 
-  const login = async (username: string) => {
+  const login = async (username: string, password: string) => {
     const users = await api.getUsers();
     const found = users.find(u => u.username === username);
-    if (found) {
-      setUser(found);
-      localStorage.setItem('auth_user', JSON.stringify(found));
-    }
+    if (!found) return { ok: false, error: 'Username not found' };
+    if (found.password !== password) return { ok: false, error: 'Incorrect password' };
+    setUser(found);
+    localStorage.setItem('auth_user', JSON.stringify(found));
+    return { ok: true };
   };
 
   const logout = () => {

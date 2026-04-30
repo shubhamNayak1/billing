@@ -4,7 +4,24 @@ import { useAuth } from '../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
-  const [selected, setSelected] = useState('admin');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!username.trim() || !password) {
+      setError('Username and password are required');
+      return;
+    }
+    setLoading(true);
+    const result = await login(username.trim(), password);
+    setLoading(false);
+    if (!result.ok) setError(result.error || 'Login failed');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] p-6">
       <div className="bg-white p-16 rounded-[4rem] shadow-3xl w-full max-w-lg text-center animate-in fade-in zoom-in duration-500 relative overflow-hidden border-8 border-slate-50">
@@ -14,18 +31,46 @@ export const LoginPage: React.FC = () => {
           <h1 className="text-5xl font-black text-slate-900 tracking-tighter uppercase tracking-[0.1em]">OmniBill Pro</h1>
           <p className="text-slate-400 text-sm mt-3 font-black uppercase tracking-[0.3em] opacity-60">Enterprise ERP Simulation</p>
         </div>
-        <div className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest text-left ml-4 mb-2">Select Operator Context</label>
-            <select className="w-full p-5 border-4 border-slate-50 rounded-3xl font-black text-slate-800 bg-slate-50 focus:border-blue-500 focus:bg-white transition-all outline-none text-lg appearance-none cursor-pointer" value={selected} onChange={e => setSelected(e.target.value)}>
-              <option value="admin">Institutional Administrator</option>
-              <option value="billing">Terminal Operator</option>
-              <option value="viewer">Audit Auditor (View-Only)</option>
-            </select>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest text-left ml-4 mb-2">Username</label>
+            <input
+              type="text"
+              autoComplete="username"
+              className="w-full p-5 border-4 border-slate-50 rounded-3xl font-black text-slate-800 bg-slate-50 focus:border-blue-500 focus:bg-white transition-all outline-none text-lg"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="admin"
+            />
           </div>
-          <button onClick={() => login(selected)} className="w-full bg-blue-600 py-6 rounded-[2rem] text-white font-black text-2xl hover:bg-blue-700 hover:shadow-2xl transition-all active:scale-95 shadow-xl shadow-blue-600/30 border-b-8 border-blue-900">INITIALIZE SESSION</button>
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest text-left ml-4 mb-2">Password</label>
+            <input
+              type="password"
+              autoComplete="current-password"
+              className="w-full p-5 border-4 border-slate-50 rounded-3xl font-black text-slate-800 bg-slate-50 focus:border-blue-500 focus:bg-white transition-all outline-none text-lg"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </div>
+          {error && (
+            <div className="text-red-600 text-sm font-black uppercase tracking-widest bg-red-50 border-2 border-red-100 rounded-2xl p-3">
+              {error}
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 py-6 rounded-[2rem] text-white font-black text-2xl hover:bg-blue-700 hover:shadow-2xl transition-all active:scale-95 shadow-xl shadow-blue-600/30 border-b-8 border-blue-900 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? 'AUTHENTICATING…' : 'INITIALIZE SESSION'}
+          </button>
+        </form>
+        <div className="mt-10 text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] space-y-1">
+          <p className="opacity-70">Demo Credentials</p>
+          <p className="opacity-50">admin / admin123 — billing / billing123 — viewer / viewer123</p>
         </div>
-        <p className="mt-12 text-[10px] text-slate-300 uppercase tracking-[0.5em] font-black select-none">Validated Cloud Enterprise Architecture</p>
       </div>
     </div>
   );

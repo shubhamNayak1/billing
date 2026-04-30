@@ -15,6 +15,13 @@ export const Inventory: React.FC = () => {
   const load = () => api.getProducts().then(setProducts);
   useEffect(() => { load(); }, []);
 
+  const handleRetire = async (p: Product) => {
+    if (confirm(`Retire "${p.name}" from the asset ledger? This cannot be undone.`)) {
+      await api.deleteProduct(p.id);
+      load();
+    }
+  };
+
   const filteredProducts = useMemo(() => {
     if (filter === 'low-stock') {
       return products.filter(p => p.totalStock <= p.lowStockThreshold);
@@ -64,7 +71,7 @@ export const Inventory: React.FC = () => {
                 </td>
                 <td className="p-6 text-center">
                   <button onClick={() => { setSelectedProduct(p); setModalOpen(true); }} className="text-blue-600 font-black text-xs mr-5 hover:underline decoration-2">Modify</button>
-                  <button className="text-red-400 font-black text-xs hover:text-red-600 transition-colors">Retire</button>
+                  <button onClick={() => handleRetire(p)} className="text-red-400 font-black text-xs hover:text-red-600 transition-colors">Retire</button>
                 </td>
               </tr>
             ))}

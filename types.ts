@@ -9,6 +9,7 @@ export interface User {
   id: string;
   name: string;
   username: string;
+  password: string;
   role: UserRole;
   tier: 'TIER-1' | 'TIER-2';
 }

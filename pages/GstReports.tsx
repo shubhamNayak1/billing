@@ -24,6 +24,51 @@ export const GstReports: React.FC = () => {
     }, {} as Record<number, { taxable: number, cgst: number, sgst: number, igst: number }>);
   }, [invoices]);
 
+  const handleExport = () => {
+    const period = new Date().toISOString().slice(0, 7);
+    const payload = {
+      gstr: 'GSTR-1',
+      period,
+      generatedAt: new Date().toISOString(),
+      b2b: b2bInvoices.map(inv => ({
+        invoiceNo: inv.invoiceNo,
+        date: inv.date,
+        gstin: inv.customerGstin,
+        customerName: inv.customerName,
+        placeOfSupply: inv.customerState,
+        taxableValue: inv.subTotal,
+        totalTax: inv.totalTax,
+        invoiceValue: inv.grandTotal,
+        items: inv.items
+      })),
+      b2c: b2cInvoices.map(inv => ({
+        invoiceNo: inv.invoiceNo,
+        date: inv.date,
+        customerName: inv.customerName,
+        placeOfSupply: inv.customerState,
+        taxableValue: inv.subTotal,
+        totalTax: inv.totalTax,
+        invoiceValue: inv.grandTotal
+      })),
+      hsnSummary: Object.entries(taxSummary).map(([rate, data]) => ({
+        gstRate: Number(rate),
+        taxableValue: Number(data.taxable.toFixed(2)),
+        cgst: Number(data.cgst.toFixed(2)),
+        sgst: Number(data.sgst.toFixed(2)),
+        igst: Number(data.igst.toFixed(2))
+      }))
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `GSTR1-${period}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="p-8 animate-in fade-in slide-in-from-top-4 duration-500">
       <div className="flex justify-between items-center mb-8">
@@ -31,7 +76,7 @@ export const GstReports: React.FC = () => {
           <h2 className="text-3xl font-black tracking-tighter">GSTR-1 Tax Assistant</h2>
           <p className="text-slate-500 text-sm font-medium">Auto-aggregated tax slabs for monthly compliance.</p>
         </div>
-        <button className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-black shadow-xl shadow-emerald-500/20 text-sm flex items-center gap-2 active:scale-95 transition-all">
+        <button onClick={handleExport} className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-black shadow-xl shadow-emerald-500/20 text-sm flex items-center gap-2 active:scale-95 transition-all hover:bg-emerald-700">
            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
            Export Offline JSON
         </button>

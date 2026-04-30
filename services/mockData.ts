@@ -2,9 +2,9 @@
 import { Product, User, UserRole, Invoice } from '../types';
 
 export const MOCK_USERS: User[] = [
-  { id: '1', name: 'Rajesh Kumar', username: 'admin', role: UserRole.ADMIN, tier: 'TIER-2' },
-  { id: '2', name: 'Suresh Patel', username: 'billing', role: UserRole.OPERATOR, tier: 'TIER-1' },
-  { id: '3', name: 'Amit Sharma', username: 'viewer', role: UserRole.VIEWER, tier: 'TIER-1' }
+  { id: '1', name: 'Rajesh Kumar', username: 'admin', password: 'admin123', role: UserRole.ADMIN, tier: 'TIER-2' },
+  { id: '2', name: 'Suresh Patel', username: 'billing', password: 'billing123', role: UserRole.OPERATOR, tier: 'TIER-1' },
+  { id: '3', name: 'Amit Sharma', username: 'viewer', password: 'viewer123', role: UserRole.VIEWER, tier: 'TIER-1' }
 ];
 
 export const MOCK_PRODUCTS: Product[] = [
