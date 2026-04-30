@@ -1,12 +1,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Product, Invoice, InvoiceItem } from '../types';
+import { Product } from '../types';
 import { api } from '../services/api';
-import { useAuth } from '../context/AuthContext';
 
 export const Billing: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [items, setItems] = useState<{ productId: string; productName: string; hsnCode: string; qty: number; rate: number; gstRate: number; total: number }[]>([]);
@@ -50,39 +48,17 @@ export const Billing: React.FC = () => {
       alert('Verification Failed: Customer profile or line items are missing.');
       return;
     }
-    
-    const subTotal = items.reduce((acc, i) => acc + (i.rate * i.qty), 0);
-    const totalTax = items.reduce((acc, i) => acc + (i.rate * i.qty * i.gstRate / 100), 0);
-    const grandTotal = subTotal + totalTax;
-
-    const invoiceItems: InvoiceItem[] = items.map(item => {
-      const tax = item.rate * item.qty * item.gstRate / 100;
-      const isInterState = customer.state !== 'Maharashtra';
-      return {
-        ...item,
-        cgst: isInterState ? 0 : tax / 2,
-        sgst: isInterState ? 0 : tax / 2,
-        igst: isInterState ? tax : 0,
-        total: (item.rate * item.qty) + tax
-      };
-    });
-
-    const invoice: Invoice = {
-      id: Math.random().toString(36).substr(2, 9),
-      invoiceNo: `INV/${new Date().getFullYear()}/${Math.floor(Math.random()*1000).toString().padStart(3, '0')}`,
-      date: new Date().toISOString(),
-      customerName: customer.name,
-      customerGstin: customer.gstin,
-      customerState: customer.state,
-      items: invoiceItems,
-      subTotal,
-      totalTax,
-      grandTotal,
-      createdBy: user?.name || 'System'
-    };
-
-    await api.createInvoice(invoice);
-    navigate('/invoices');
+    try {
+      await api.createInvoice({
+        customerName: customer.name,
+        customerGstin: customer.gstin || undefined,
+        customerState: customer.state,
+        items: items.map(i => ({ productId: i.productId, qty: i.qty, rate: i.rate })),
+      });
+      navigate('/invoices');
+    } catch (e: any) {
+      alert(e?.message || 'Failed to create invoice');
+    }
   };
 
   return (

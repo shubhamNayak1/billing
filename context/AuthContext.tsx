@@ -1,7 +1,12 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import { User } from '../types';
-import { api } from '../services/api';
+import { http, tokenStore, ApiError } from '../services/http';
+
+interface LoginResponse {
+  token: string;
+  user: User;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -18,17 +23,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const login = async (username: string, password: string) => {
-    const users = await api.getUsers();
-    const found = users.find(u => u.username === username);
-    if (!found) return { ok: false, error: 'Username not found' };
-    if (found.password !== password) return { ok: false, error: 'Incorrect password' };
-    setUser(found);
-    localStorage.setItem('auth_user', JSON.stringify(found));
-    return { ok: true };
+    try {
+      const res = await http.post<LoginResponse>('/auth/login', { username, password });
+      tokenStore.set(res.token);
+      setUser(res.user);
+      localStorage.setItem('auth_user', JSON.stringify(res.user));
+      return { ok: true };
+    } catch (e) {
+      const err = e as ApiError;
+      return { ok: false, error: err?.message || 'Login failed' };
+    }
   };
 
   const logout = () => {
     setUser(null);
+    tokenStore.clear();
     localStorage.removeItem('auth_user');
   };
 
